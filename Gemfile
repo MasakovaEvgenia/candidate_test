@@ -1,11 +1,9 @@
-# frozen_string_literal: true
-
 source 'https://rubygems.org'
 
-gem 'activesupport'
-gem 'capybara', '2.13.0'
-gem 'cucumber', '2.4.0'
+gem 'activesupport', '~> 7.0'
+gem 'capybara', '~> 3.39'
+gem 'cucumber', '~> 9.0'
 gem 'psych'
 gem 'rest-client'
-gem 'rspec', '~> 3.5'
-gem 'selenium-webdriver', '2.53.4'
+gem 'rspec', '~> 3.12'
+gem 'selenium-webdriver', '~> 4.15'

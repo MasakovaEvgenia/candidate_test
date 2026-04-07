@@ -29,8 +29,8 @@ class RestWrapper
                                            payload: params.to_json,
                                            headers: { content_type: 'application/json' }
     JSON.parse(response)
-  rescue StandardError => e
-    send_error e
+  rescue => e
+    send_error(e)
   end
 
   def put(current_url, params = {})
@@ -41,10 +41,9 @@ class RestWrapper
                                            payload: params.to_json,
                                            headers: { content_type: 'application/json' }
     JSON.parse(response)
-  rescue StandardError => e
-    send_error e
+  rescue => e
+    send_error(e)
   end
-
   def delete(current_url, params = {})
     response = RestClient::Request.execute method: :delete,
                                            url: compile_full_url(current_url),
@@ -61,16 +60,32 @@ class RestWrapper
 
   def send_error(exception)
     puts exception.inspect
-    body = exception.response.body
-    raise_message = if body.class == String
-                      "Ошибка #{exception.response.code} с текстом #{JSON.parse(body)}"
-                    else
-                      "Ошибка #{exception}"
-                    end
+
+    #есть ли у исключения метод response
+    if exception.respond_to?(:response) && exception.response
+      status_code = exception.response.code
+      body = exception.response.body
+
+      if body && body.strip.start_with?('{', '[')
+        begin
+          parsed_body = JSON.parse(body)
+          raise_message = "Ошибка #{status_code} с текстом #{parsed_body}"
+        rescue
+          raise_message = "Ошибка #{status_code} с телом: #{body[0..200]}"
+        end
+      else
+        raise_message = "Ошибка #{status_code}"
+      end
+    else
+      # если это не RestClient ошибка
+      raise_message = "Ошибка: #{exception.message}"
+    end
+
     raise raise_message
   end
 
-  def compile_full_url(current_url)
+   def compile_full_url(current_url)
+     # добавида метод, без него негативные тесты падают
     url + current_url
   end
-end
+  end
